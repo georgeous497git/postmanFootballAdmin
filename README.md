@@ -30,7 +30,7 @@ Instructions to import the Postman Collection to run the Integration testing for
 
 ## RUN
 
-#### Team Operations
+#### Team & Player Operations
 
 1. Select the folder Team Operations and click on **Run** button to execute the Integration Testing for all HTTP methods (POST, GET, PUT)
 <img src="https://github.com/georgeous497git/postmanFootballAdmin/blob/develop/images/1-teamExecution.png" width="800" height="150">
@@ -40,4 +40,3 @@ Instructions to import the Postman Collection to run the Integration testing for
 
 3. Validate the 24 success operations
 <img src="https://github.com/georgeous497git/postmanFootballAdmin/blob/develop/images/3-runTeamFull.png" width="800" height="150">
-
