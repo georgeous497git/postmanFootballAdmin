@@ -1,0 +1,1511 @@
+{
+	"info": {
+		"_postman_id": "29632abe-36bd-44fa-8d85-a6fbc24721b4",
+		"name": "Football Team Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14847627"
+	},
+	"item": [
+		{
+			"name": "Team Operations",
+			"item": [
+				{
+					"name": "Create a Team with Player",
+					"item": [
+						{
+							"name": "Create a Team with Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const teamName = \"Ajax FC\";",
+											"const country = \"Amsterdam\";",
+											"const wins = 86;",
+											"",
+											"const playerName = \"Peter\";",
+											"const playerAge = 37;",
+											"const playerRate = 47.6;",
+											"",
+											"const player = {",
+											"    name: playerName,",
+											"    age: playerAge,",
+											"    rate: playerRate",
+											"}",
+											"",
+											"let players = [ player ];",
+											"",
+											"//Team variables",
+											"pm.variables.set(\"teamName\", teamName);",
+											"pm.variables.set(\"country\", country);",
+											"pm.variables.set(\"wins\", wins);",
+											"//Player variables",
+											"pm.variables.set(\"playerName\", playerName);",
+											"pm.variables.set(\"playerAge\", playerAge);",
+											"pm.variables.set(\"playerRate\", playerRate);",
+											"pm.variables.set(\"players\", JSON.stringify(players));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let teamName = pm.variables.get(\"teamName\");",
+											"var idTeam;",
+											"",
+											"pm.test(\"Generating the Team: \" + teamName, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    idTeam = team.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idTeam\", idTeam);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Get Team with player\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{teamName}}\",\n  \"country\": \"{{country}}\",\n  \"wins\": {{wins}},\n  \"football-players\": {{players}} \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Team with player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    pm.expect(team.name).to.be.eq(pm.variables.get(\"teamName\"));",
+											"    pm.expect(team.country).to.be.eq(pm.variables.get(\"country\"));",
+											"    pm.expect(team.wins).to.be.eq(pm.variables.get(\"wins\"));",
+											"})",
+											"",
+											"if(pm.response.to.have.status(200)) {",
+											"    postman.setNextRequest(\"Get Players for team\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Players for team",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying players with Id Team: \" + idTeam, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"var queriedPlayer = response.data[\"football-players\"][0];",
+											"const queriedPlayerId = queriedPlayer.id;",
+											"const queriedPlayerName = queriedPlayer.name;",
+											"const queriedPlayerAge = queriedPlayer.age;",
+											"const queriedPlayerRate = queriedPlayer.rate;",
+											"",
+											"const playerName = pm.variables.get(\"playerName\");",
+											"const playerAge = pm.variables.get(\"playerAge\");",
+											"const playerRate = pm.variables.get(\"playerRate\");",
+											"",
+											"pm.test(\"Validating Player Id\", function() {",
+											"    pm.expect(queriedPlayerId).to.be.not.eq(undefined);",
+											"})",
+											"",
+											"pm.test(\"Validating Player Name: \" + playerName, function() {",
+											"    pm.expect(playerName).to.be.eq(queriedPlayerName);",
+											"})",
+											"",
+											"pm.test(\"Validating Player Age: \" + playerAge, function() {",
+											"    pm.expect(playerAge).to.be.eq(queriedPlayerAge);",
+											"})",
+											"",
+											"pm.test(\"Validating Player Rate: \" + playerRate, function() {",
+											"    pm.expect(playerRate).to.be.eq(queriedPlayerRate);",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player?filter.idTeam={{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player"
+									],
+									"query": [
+										{
+											"key": "filter.idTeam",
+											"value": "{{idTeam}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Delete a Team",
+					"item": [
+						{
+							"name": "Create a Team with Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const teamName = \"Ajax FC\";",
+											"const country = \"Amsterdam\";",
+											"const wins = 86;",
+											"",
+											"const playerName = \"Peter\";",
+											"const playerAge = 37;",
+											"const playerRate = 47.6;",
+											"",
+											"const player = {",
+											"    name: playerName,",
+											"    age: playerAge,",
+											"    rate: playerRate",
+											"}",
+											"",
+											"let players = [ player ];",
+											"",
+											"//Team variables",
+											"pm.variables.set(\"teamName\", teamName);",
+											"pm.variables.set(\"country\", country);",
+											"pm.variables.set(\"wins\", wins);",
+											"//Player variables",
+											"pm.variables.set(\"playerName\", playerName);",
+											"pm.variables.set(\"playerAge\", playerAge);",
+											"pm.variables.set(\"playerRate\", playerRate);",
+											"pm.variables.set(\"players\", JSON.stringify(players));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let teamName = pm.variables.get(\"teamName\");",
+											"var idTeam;",
+											"",
+											"pm.test(\"Generating the Team: \" + teamName, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    idTeam = team.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idTeam\", idTeam);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Delete Team\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{teamName}}\",\n  \"country\": \"{{country}}\",\n  \"wins\": {{wins}},\n  \"football-players\": {{players}} \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Team",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"",
+											"pm.test(\"Deleting Team with Id: \" + idTeam, function() { })",
+											"",
+											"postman.setNextRequest(\"Attempt to get deleted team\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Attempt to get deleted team",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"There is not Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(404);",
+											"})",
+											"",
+											"if(pm.response.to.have.status(404)) {",
+											"    postman.setNextRequest(\"Atempt to get players for deleted team\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atempt to get players for deleted team",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"There is not Players for Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(404);",
+											"})",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player?filter.idTeam={{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player"
+									],
+									"query": [
+										{
+											"key": "filter.idTeam",
+											"value": "{{idTeam}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create a Team with no Player",
+					"item": [
+						{
+							"name": "Create a Team with no Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const teamName = \"PSV Eindhoven\";",
+											"const country = \"The Netherlands\";",
+											"const wins = 56;",
+											"",
+											"// const playerName = \"Peter\";",
+											"// const playerAge = 37;",
+											"// const playerRate = 47.6;",
+											"",
+											"// const player = {",
+											"//     name: playerName,",
+											"//     age: playerAge,",
+											"//     rate: playerRate",
+											"// }",
+											"",
+											"// let players = [ player ];",
+											"",
+											"//Team variables",
+											"pm.variables.set(\"teamName\", teamName);",
+											"pm.variables.set(\"country\", country);",
+											"pm.variables.set(\"wins\", wins);",
+											"//Player variables",
+											"// pm.variables.set(\"playerName\", playerName);",
+											"// pm.variables.set(\"playerAge\", playerAge);",
+											"// pm.variables.set(\"playerRate\", playerRate);",
+											"// pm.variables.set(\"players\", JSON.stringify(players));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let teamName = pm.variables.get(\"teamName\");",
+											"var idTeam;",
+											"",
+											"pm.test(\"Generating the Team: \" + teamName, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    idTeam = team.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idTeam\", idTeam);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Get Team with no player\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{teamName}}\",\n  \"country\": \"{{country}}\",\n  \"wins\": {{wins}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Team with no player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    pm.expect(team.name).to.be.eq(pm.variables.get(\"teamName\"));",
+											"    pm.expect(team.country).to.be.eq(pm.variables.get(\"country\"));",
+											"    pm.expect(team.wins).to.be.eq(pm.variables.get(\"wins\"));",
+											"})",
+											"",
+											"if(pm.response.to.have.status(200)) {",
+											"    postman.setNextRequest(\"Get empty players\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get empty players",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"",
+											"pm.test(\"Querying NO existing players for Team: \" + idTeam, function() {",
+											"    pm.response.to.have.status(404);",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player?filter.idTeam={{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player"
+									],
+									"query": [
+										{
+											"key": "filter.idTeam",
+											"value": "{{idTeam}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Update Team",
+					"item": [
+						{
+							"name": "Create a Team with Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const teamName = \"Original Team\";",
+											"const country = \"Amsterdam\";",
+											"const wins = 86;",
+											"",
+											"const playerName = \"Original Player\";",
+											"const playerAge = 23;",
+											"const playerRate = 57.6;",
+											"",
+											"const player = {",
+											"    name: playerName,",
+											"    age: playerAge,",
+											"    rate: playerRate",
+											"}",
+											"",
+											"let players = [ player ];",
+											"",
+											"//Team variables",
+											"pm.variables.set(\"teamName\", teamName);",
+											"pm.variables.set(\"country\", country);",
+											"pm.variables.set(\"wins\", wins);",
+											"//Player variables",
+											"pm.variables.set(\"playerName\", playerName);",
+											"pm.variables.set(\"playerAge\", playerAge);",
+											"pm.variables.set(\"playerRate\", playerRate);",
+											"pm.variables.set(\"players\", JSON.stringify(players));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let teamName = pm.variables.get(\"teamName\");",
+											"var idTeam;",
+											"",
+											"pm.test(\"Generating the Team: \" + teamName, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    idTeam = team.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idTeam\", idTeam);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Get Team with player for update\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{teamName}}\",\n  \"country\": \"{{country}}\",\n  \"wins\": {{wins}},\n  \"football-players\": {{players}} \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Team with player for update",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-teams\"], function(team) {",
+											"    pm.expect(team.name).to.be.eq(pm.variables.get(\"teamName\"));",
+											"    pm.expect(team.country).to.be.eq(pm.variables.get(\"country\"));",
+											"    pm.expect(team.wins).to.be.eq(pm.variables.get(\"wins\"));",
+											"})",
+											"",
+											"if(pm.response.to.have.status(200)) {",
+											"    postman.setNextRequest(\"Update team and player\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update team and player",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Updating Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"if(pm.response.to.have.status(200)) {",
+											"    postman.setNextRequest(\"Get Team with player updated\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const newTeamName = \"Ajax FC\";",
+											"const country = pm.variables.get(\"country\");",
+											"const newWins = 22;",
+											"",
+											"const newPlayerName = \"Peter\";",
+											"const newPlayerAge = 37;",
+											"const newPlayerRate = 47.6;",
+											"",
+											"const newPlayer = {",
+											"    name: newPlayerName,",
+											"    age: newPlayerAge,",
+											"    rate: newPlayerRate",
+											"}",
+											"",
+											"let newPlayers = [ newPlayer ];",
+											"",
+											"//Team variables",
+											"pm.variables.set(\"newTeamName\", newTeamName);",
+											"pm.variables.set(\"country\", country);",
+											"pm.variables.set(\"newWins\", newWins);",
+											"//Player variables",
+											"pm.variables.set(\"newPlayerName\", newPlayerName);",
+											"pm.variables.set(\"newPlayerAge\", newPlayerAge);",
+											"pm.variables.set(\"newPlayerRate\", newPlayerRate);",
+											"pm.variables.set(\"newPlayers\", JSON.stringify(newPlayers));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{newTeamName}}\",\n  \"country\": \"{{country}}\",\n  \"wins\": {{newWins}},\n  \"football-players\": {{newPlayers}} \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Team with player updated",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idTeam = pm.variables.get(\"idTeam\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying Team with Id: \" + idTeam, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"const teamResponse = response.data[\"football-teams\"][0];",
+											"const teamName = teamResponse.name;",
+											"const teamCountry = teamResponse.country;",
+											"const teamWins = teamResponse.wins;",
+											"",
+											"const playerResponse = teamResponse[\"football-players\"];",
+											"const playerName = playerResponse[0].name;",
+											"const playerAge = playerResponse[0].age;",
+											"const playerRate = playerResponse[0].rate;",
+											"",
+											"pm.test(\"Validating Updated Team Name: \" + teamName, function() {",
+											"    pm.expect(teamName).to.be.eq(pm.variables.get(\"newTeamName\"));",
+											"})",
+											"",
+											"pm.test(\"Validating Updated Country: \" + teamCountry, function() {",
+											"    pm.expect(teamCountry).to.be.eq(pm.variables.get(\"country\"));",
+											"})",
+											"",
+											"pm.test(\"Validating Updated Wins: \" + teamWins , function() {",
+											"    pm.expect(teamWins).to.be.eq(pm.variables.get(\"newWins\"));",
+											"})",
+											"",
+											"pm.test(\"Validating Updated Player Name: \" + playerName, function() {",
+											"    pm.expect(playerName).to.be.eq(pm.variables.get(\"newPlayerName\"));",
+											"})",
+											"",
+											"pm.test(\"Validating Updated Player Age: \" + playerAge, function() {",
+											"    pm.expect(playerAge).to.be.eq(pm.variables.get(\"newPlayerAge\"));",
+											"})",
+											"",
+											"pm.test(\"Validating Updated Player Rate: \" + playerRate, function() {",
+											"    pm.expect(playerRate).to.be.eq(pm.variables.get(\"newPlayerRate\"));",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-team/{{idTeam}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-team",
+										"{{idTeam}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Player Operations",
+			"item": [
+				{
+					"name": "Create Player",
+					"item": [
+						{
+							"name": "Create Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const name = 'Jorge C';",
+											"const age = 35",
+											"const rate = 67",
+											"",
+											"pm.variables.set('name', name);",
+											"pm.variables.set('age', age);",
+											"pm.variables.set('rate', rate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let name = pm.variables.get(\"name\");",
+											"var idPlayer;",
+											"",
+											"pm.test(\"Generating the PLayer: \" + name, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-players\"], function(player) {",
+											"    idPlayer = player.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idPlayer\", idPlayer);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Get Created Player\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"age\": {{age}},\n  \"rate\": {{rate}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Created Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPlayer\");"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPlayer\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying Player with Id: \" + idPlayer, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-players\"], function(player) {",
+											"    pm.expect(player.name).to.be.eq(pm.variables.get(\"name\"));",
+											"    pm.expect(player.age).to.be.eq(pm.variables.get(\"age\"));",
+											"    pm.expect(player.rate).to.be.eq(pm.variables.get(\"rate\"));",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player/{{idPlayer}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player",
+										"{{idPlayer}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Delete a Player",
+					"item": [
+						{
+							"name": "Create Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const name = 'Jorge C';",
+											"const age = 35",
+											"const rate = 67",
+											"",
+											"pm.variables.set('name', name);",
+											"pm.variables.set('age', age);",
+											"pm.variables.set('rate', rate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let name = pm.variables.get(\"name\");",
+											"var idPlayer;",
+											"",
+											"pm.test(\"Generating the PLayer: \" + name, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-players\"], function(player) {",
+											"    idPlayer = player.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idPlayer\", idPlayer);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Delete Player\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"age\": {{age}},\n  \"rate\": {{rate}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Player",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPlayer\");",
+											"",
+											"pm.test(\"Deleting Team with Id: \" + idPlayer, function() { })",
+											"",
+											"postman.setNextRequest(\"Attempt to get player\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player/{{idPlayer}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player",
+										"{{idPlayer}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Attempt to get player",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPlayer\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"There is not a Player with Id: \" + idPlayer, function() {",
+											"    pm.response.to.have.status(404);",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player/{{idPlayer}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player",
+										"{{idPlayer}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Update a Player",
+					"item": [
+						{
+							"name": "Create Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const name = 'Jorge C';",
+											"const age = 35",
+											"const rate = 67",
+											"",
+											"pm.variables.set('name', name);",
+											"pm.variables.set('age', age);",
+											"pm.variables.set('rate', rate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json();",
+											"let name = pm.variables.get(\"name\");",
+											"var idPlayer;",
+											"",
+											"pm.test(\"Generating the PLayer: \" + name, function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-players\"], function(player) {",
+											"    idPlayer = player.id;",
+											"})",
+											"",
+											"pm.variables.set(\"idPlayer\", idPlayer);",
+											"",
+											"if(pm.response.to.have.status(201)) {",
+											"    postman.setNextRequest(\"Update Player\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}\",\n  \"age\": {{age}},\n  \"rate\": {{rate}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Player",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const newName = 'Jorge C';",
+											"const newAge = 35",
+											"const newRate = 67",
+											"",
+											"pm.variables.set('newName', newName);",
+											"pm.variables.set('newAge', newAge);",
+											"pm.variables.set('newRate', newRate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPLayer\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Updating Player with Id: \" + idPlayer, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"if(pm.response.to.have.status(200)) {",
+											"    postman.setNextRequest(\"Get Player updated\");",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{newName}}\",\n  \"age\": {{newAge}},\n  \"rate\": {{newRate}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player/{{idPlayer}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player",
+										"{{idPlayer}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Player updated",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPlayer\");"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const idPlayer = pm.variables.get(\"idPlayer\");",
+											"let response = pm.response.json();",
+											"",
+											"pm.test(\"Querying Player with Id: \" + idPlayer, function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"_.forEach(response.data[\"football-players\"], function(player) {",
+											"    pm.expect(player.name).to.be.eq(pm.variables.get(\"newName\"));",
+											"    pm.expect(player.age).to.be.eq(pm.variables.get(\"newAge\"));",
+											"    pm.expect(player.rate).to.be.eq(pm.variables.get(\"newRate\"));",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}:{{port}}/football-admin/v1/football-player/{{idPlayer}}",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"football-admin",
+										"v1",
+										"football-player",
+										"{{idPlayer}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const port = '8082';",
+					"const host = 'localhost';",
+					"",
+					"pm.variables.set(\"port\", port);",
+					"pm.variables.set(\"host\", host);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
